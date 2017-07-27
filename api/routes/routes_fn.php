@@ -7,11 +7,12 @@ function api_resource($apiReource){
         return strtoupper($matches[1]);
     }, $apiResourceValue) . 'Controller';
     Route::get($apiResourceValue."/",$pascalCase."@index");
-    Route::post($apiResourceValue."/test",$pascalCase."@test");
+    Route::get($apiResourceValue."/test",$pascalCase."@test");
     Route::post($apiResourceValue."/create",$pascalCase."@create");
     Route::post($apiResourceValue."/retrieve",$pascalCase."@retrieve");
     Route::post($apiResourceValue."/update",$pascalCase."@update");
     Route::post($apiResourceValue."/delete",$pascalCase."@delete");
+    Route::post($apiResourceValue."/handler",$pascalCase."@handler");
   }
 }
 

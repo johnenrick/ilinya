@@ -12,7 +12,8 @@ $apiResources = [
   'account',
   'account_type',
   'account_information',
-  'account_profile_picture'
+  'account_profile_picture',
+  'botman'
 ];
 api_resource($apiResources);
 

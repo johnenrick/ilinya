@@ -61,11 +61,6 @@ export default {
           label_colspan: 0,
           db_name: 'company_branches[contact_number]',
           placeholder: 'Company Contact Number'
-        },
-        fax_number: {
-          label_colspan: 0,
-          db_name: 'company_branches[fax_number]',
-          placeholder: 'Company Fax Number'
         }
       },
       errorList: {},

@@ -17,10 +17,13 @@ class CreateCompaniesTable extends Migration
         Schema::create('companies', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('business_type_id');
-            $table->longText('vision')->nullable();
-            $table->longText('mission')->nullable();
-            $table->longText('core_values')->nullable();
-            $table->longText('social_responsibilities')->nullable();
+            $table->string('name',100);
+            $table->string('code',100);
+            $table->string('email', 100);
+            $table->string('contact_number',20);
+            $table->string('address',100);
+            $table->decimal('location_lat', 10, 8)->nullable();
+            $table->decimal('location_lng', 10, 8)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

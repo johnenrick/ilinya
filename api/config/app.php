@@ -164,6 +164,7 @@ return [
         Illuminate\View\ViewServiceProvider::class,
         Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class,
 
+
         /*
          * Package Service Providers...
          */
@@ -177,6 +178,10 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        /*
+                BOTMAN.IO
+        */
+        Mpociot\BotMan\BotManServiceProvider::class,
 
     ],
 
@@ -228,6 +233,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'JWTAuth'   => Tymon\JWTAuthFacades\JWTAuth::class,
         'JWTFactory' => Tymon\JWTAuthFacades\JWTFactory::class,
+        'BotMan' => Mpociot\BotMan\Facades\BotMan::class
 
     ],
 

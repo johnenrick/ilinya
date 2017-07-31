@@ -26,7 +26,7 @@ class APIModel extends Model
     //   return $this->getConnection()->getSchemaBuilder()->listTableDetails("inventory");
     // }
     public function newModel($table, $attribute){
-      $modelName = "App\\".str_replace(' ', '', ucwords(str_replace('_', ' ', $table)));
+      $modelName = "App\\".str_replace(' ', '', ucwords(str_replace('_', ' ', str_singular($table))));
       return new $modelName($attribute);
     }
 }

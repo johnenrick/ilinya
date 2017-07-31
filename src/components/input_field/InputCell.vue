@@ -76,6 +76,19 @@
           v-on:change="valueChanged"
           >
         </select2>
+        <table-input
+          v-else-if="inputType === 'table-input'"
+          :input_setting="input_setting"
+          :db_name="dbName"
+          :field_name="field_name"
+          :form_data="form_data"
+          :form_status="form_status"
+          :default_value="default_value"
+          :placeholder="placeholder"
+          :form_data_updated="form_data_updated"
+          v-on:change="valueChanged"
+          >
+        </table-input>
         <template
           v-else-if="inputType === 'static'"
         >
@@ -109,7 +122,8 @@
       'select-input': require('./Select.vue'),
       'select2': require('./Select2.vue'),
       'textarea-input': require('./Textarea.vue'),
-      'single-image': require('./SingleImage.vue')
+      'single-image': require('./SingleImage.vue'),
+      'table-input': require('./TableInput.vue')
     },
     create(){
 

@@ -13,7 +13,9 @@ $apiResources = [
   'account_type',
   'account_information',
   'account_profile_picture',
-  'botman'
+  'botman',
+  'queue_form',
+  'queue_form_field'
 ];
 api_resource($apiResources);
 

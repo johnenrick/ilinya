@@ -1,6 +1,5 @@
-<template>
+/v  <template>
   <div>
-    <table-filter v-if="filter_setting" v-on:filter="retrieveData('filter')" :filter_setting="filter_setting" ref="tableFilter"></table-filter>
     <table class="table">
       <thead>
         <tr>
@@ -10,12 +9,13 @@
             v-on:click="changeSort(0, index)"
           >
             {{column['name']}}
-            <span class="pull-right">
+            <!--<span class="pull-right">
               <i v-if="column['sort'] === 0" class="fa fa-sort" aria-hidden="true"></i>
               <i v-else-if="column['sort'] === 1" class="fa fa-sort-asc" aria-hidden="true"></i>
               <i v-else-if="column['sort'] === 2" class="fa fa-sort-desc" aria-hidden="true"></i>
-            </span>
+            </span>-->
           </th>
+          <th v-if="action['remove_entry']"></th>
         </tr>
         <tr>
           <th v-for="(column, index) in columnSetting[1]"
@@ -24,11 +24,11 @@
             v-on:click="changeSort(1, index)"
           >
             {{column['name']}}
-            <span class="pull-right">
+            <!---<span class="pull-right">
               <i v-if="column['sort'] === 0" class="fa fa-sort" aria-hidden="true"></i>
               <i v-else-if="column['sort'] === 1" class="fa fa-sort-asc" aria-hidden="true"></i>
               <i v-else-if="column['sort'] === 2" class="fa fa-sort-desc" aria-hidden="true"></i>
-            </span>
+            </span>-->
           </th>
         </tr>
       </thead>
@@ -36,27 +36,48 @@
         <tr v-for="(tableEntry, index) in tableEntries"
           @click="$emit('row_clicked', index, tableEntry['id'])"
         >
+          <input type="hidden" v-bind:name="db_name + '[' + index + '][id]'" v-bind:value="tableEntry['id']">
           <td v-for="columnSetting in linearColumnSetting">
-            <table-cell :type="columnSetting['type']"
-              :value="columnSetting['value_function'](tableEntry, columnSetting['db_name'])"
-              >
-            </table-cell>
+            <select v-if="columnSetting['input_type'] === 'select'"
+              v-bind:value="(tableEntry[columnSetting['db_name']] || columnSetting['default_value'])"
+              class="form-control"
+              v-bind:name="db_name + '[' + index + '][' + columnSetting['db_name'] + ']'"
+            >
+              <option v-for="option in columnSetting['select_option']" v-bind:value="option['value']" v-bind:selected="(tableEntry[columnSetting['db_name']] || columnSetting['default_value'])  === option['value'] ? 'selected' : false">{{option['label']}}</option>
+            </select>
+            <input v-else
+              class="form-control"
+              v-model="tableEntry[columnSetting['db_name']]"
+              v-bind:name="db_name + '[' + index + '][' + columnSetting['db_name'] + ']'"
+            >
           </td>
+          <td v-if="action['remove_entry']"><button @click="removeEntry(index, tableEntry['id'])" class="btn btn-sm btn-danger" type="button"><i class="fa fa-remove" aria-hidden="true"></i></button></td>
         </tr>
       </tbody>
+      <tfoot>
+        <tr v-if="action['add_entry']">
+          <td v-bind:colspan="columnCount +( action['add_entry'] ? 1 : 0)">
+            <button @click="addEntry" type="button" class="btn btn-sm btn-primary pull-right"><i class="fa fa-plus" aria-hidden="true"></i> Add</button>
+          </td>
+        </tr>
+      </tfoot>
     </table>
+    <input v-for="(id, index) in deletedForeignTable"
+      v-bind:value="id"
+      v-bind:name="'deleted_foreign_table['+db_name+']['+index+']'"
+    >
   </div>
 </template>
 <script>
   import Vue from 'vue'
   export default{
-    components: {
-      'table-filter': require('./Filter.vue'),
-      'table-cell': require('./Cell.vue')
+    name: '',
+    create(){
+
     },
     mounted(){
+      this.initConfig()
       this.initColumnSetting()
-      this.retrieveData()
     },
     data(){
       return {
@@ -66,79 +87,45 @@
         ],
         linearColumnSetting: [],
         tableEntries: [],
-        currentSort: null
+        currentSort: null,
+        action: {
+          add_entry: true,
+          remove_entry: true
+        },
+        columnCount: 0,
+        deletedForeignTable: []
       }
     },
     props: {
-      api: String,
-      filter_setting: Object,
-      column_setting: Object,
-      retrieve_parameter: {
-        type: Object,
-        default(){
-          return {}
-        }
+      form_data_updated: Boolean,
+      input_setting: Object,
+      default_value: String,
+      db_name: String,
+      form_data: Object,
+      form_status: String,
+      placeholder: String
+    },
+    watch: {
+      form_data_updated(value){
+        this.tableEntries = this.form_data[this.db_name] ? this.form_data[this.db_name] : []
+        this.deletedForeignTable = []
       }
     },
     methods: {
-      changeSort(rowIndex, columnIndex){
-        (this.currentSort !== null && this.currentSort['db_name'] !== this.columnSetting[rowIndex][columnIndex]['db_name']) ? this.currentSort['sort'] = 0 : null
-        this.columnSetting[rowIndex][columnIndex]['sort'] = (this.columnSetting[rowIndex][columnIndex]['sort'] < 2)
-          ? this.columnSetting[rowIndex][columnIndex]['sort'] + 1 : 0
-        this.currentSort = this.columnSetting[rowIndex][columnIndex]
-        this.retrieveData()
-      },
-      retrieveData(retrieveType){
-        let requestOption = this.retrieve_parameter
-        if(this.currentSort && this.currentSort['sort']){
-          let orderLookUp = ['', 'asc', 'desc']
-          requestOption['sort'] = {}
-          requestOption['sort'][this.currentSort['db_name']] = orderLookUp[this.currentSort['sort']]
+      addEntry(){
+        let newEntry = {
+          id: 0
         }
-        if(retrieveType === 'filter'){
-          typeof requestOption.condition === 'undefined' ? requestOption.condition = [] : null
-          let formInputs = $(this.$refs.tableFilter.$refs.form).serializeArray()
-          for(let x in formInputs){
-            if(formInputs[x]['value'] !== ''){
-              let value = formInputs[x]['value']
-              if(this.filter_setting[formInputs[x]['name']]['clause'] === 'like'){
-                value = '%' + value + '%'
-              }
-              requestOption.condition.push({
-                column: formInputs[x]['name'],
-                value: value,
-                clause: this.filter_setting[formInputs[x]['name']]['clause']
-              })
-
-            }
-          }
+        for(let x = 0; x < this.linearColumnSetting.length; x++){
+          newEntry[this.linearColumnSetting[x]['db_name']] = null
         }
-        this.APIRequest(this.api + '/retrieve', requestOption, (response) => {
-          if(response['data']){
-            this.tableEntries = response['data']
-          }
-        })
-      },
-      updateRow(rowIndex, entryID){
-        let requestOption = {
-          id: rowIndex !== -1 ? this.tableEntries[rowIndex]['id'] : entryID
-        }
-        this.APIRequest(this.api + '/retrieve', requestOption, (response) => {
-          if(response['data']){
-            if(rowIndex !== -1){
-              Vue.set(this.tableEntries, rowIndex, response['data'])
-            }else{
-              this.tableEntries.push(response['data'])
-            }
-          }
-        })
-      },
-      deleteRow(rowIndex){
-        this.tableEntries.splice(rowIndex, 1)
+        this.tableEntries.push(newEntry)
       },
       initColumnSetting(){
-        for(let dbName in this.column_setting){
-          let column = this.column_setting[dbName]
+        let columnSetting = this.input_setting['column_setting']
+        for(let dbName in columnSetting){
+          this.columnCount++
+          let column = columnSetting[dbName]
           Vue.set(column, 'db_name', dbName)
           this.initColumn(column)
           this.columnSetting[0].push(column)
@@ -155,6 +142,13 @@
               this.linearColumnSetting.push(subColumn)
             }
             Vue.set(column, 'sub_column_count', subCount)
+          }
+        }
+      },
+      initConfig(){
+        if(typeof this.input_setting['action'] !== 'undefined'){
+          for(let x = 0; x < this.input_setting['action'].length; x++){
+            this.action[this.input_setting['action'][x]] = true
           }
         }
       },
@@ -180,8 +174,15 @@
           return value
         }) : null
         typeof column['sub_columns'] === 'undefined' ? Vue.set(column, 'sub_columns', null) : null
+      },
+      removeEntry(rowIndex, entryID){
+        console.log(this.tableEntries.splice(rowIndex, 1))
+        if(entryID){
+          this.deletedForeignTable.push(entryID)
+        }
       }
     }
+
   }
 </script>
 <style scoped>

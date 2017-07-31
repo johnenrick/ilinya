@@ -46,7 +46,7 @@ return [
     'microsoft_app_key' => 'YOUR-MICROSOFT-APP-KEY',
     'slack_token' => 'YOUR-SLACK-TOKEN-HERE',
     'telegram_token' => 'YOUR-TELEGRAM-TOKEN-HERE',
-    'facebook_token' => 'EAACfJZAjQCwcBALbm9N2r7wdPiJSBoa4uNAuPRdofhqXMoYgLV8omXf8ndgOcABTg3kOZC2Gt7Gsa8tEKixOj6UDM0Q5EDBJZAHeEsV3qW7hT2WqsIlgxsLHbEWNGuxQYu0O4bZBap0BZABQvk0mPWB6Ru4MRlZAW3ihmquFoerPHsY6MZAATLO',
+    'facebook_token' => 'EAACfJZAjQCwcBAELAQxE2wzZAtuY9G5cbUI3Y29A9W1c5boK4Ljcx9oM8q6d4QztPee2nNrJxAnY3ngZAIougw6tglHrFOSxOA6I3uZBdoOtuXkZBFAzcxKIlsJXiuWAe2vBmJQ4ltJDW3U0K0saiGZClaiyXEzpgonOD3iyRuIaQZBJA1E5csA', 
     'facebook_app_secret' => '83acd1e32930f0d4d5244532238afd29', // Optional - this is used to verify incoming API calls,
     'wechat_app_id' => 'YOUR-WECHAT-APP-ID',
     'wechat_app_key' => 'YOUR-WECHAT-APP-KEY',

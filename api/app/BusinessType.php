@@ -9,7 +9,7 @@ class BusinessType extends APIModel
 {
     use SoftDeletes;
     protected $primaryKey = 'id';
-    protected $table = 'business_type';
+    protected $table = 'business_types';
 
     public function  company(){
       return $this->hasMany('App\Company');

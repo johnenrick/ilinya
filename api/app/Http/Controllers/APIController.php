@@ -198,14 +198,24 @@ class APIController extends Controller
               if(!isset($childID[$childTable])){
                 $childID[$childTable] = array();
               }
-              $result = $this->model->find($this->model->id)->$childTable()->create($child);
-              $childID[$childTable] = $result["id"];
+              $child[str_singular($this->model->getTable()).'_id'] = $this->model->id;
+              $foreignTable = $this->model->newModel($childTable, $child);
+              foreach($child as $childKey => $childValue){
+                $foreignTable->$childKey = $childValue;
+              }
+              $result = $this->model->find($this->model->id)->$childTable()->save($foreignTable);
+              $childID[$childTable][] = $result["id"];
             }else{
               foreach($child as $childValue){
                 if(!isset($childID[$childTable])){
                   $childID[$childTable] = array();
                 }
-                $result = $this->model->find($this->model->id)->$childTable()->create($childValue);
+                $childValue[str_singular($this->model->getTable()).'_id'] = $this->model->id;
+                $foreignTable = $this->model->newModel($childTable, $childValue);
+                foreach($childValue as $childValueKey => $childValueValue){
+                  $foreignTable->$childValueKey = $childValueValue;
+                }
+                $result = $this->model->find($this->model->id)->$childTable()->save($foreignTable);
                 $childID[$childTable][] = $result["id"];
               }
             }
@@ -404,12 +414,31 @@ class APIController extends Controller
                 if(isset($childValue["id"]) && $childValue["id"]*1) {//update
                   $pk = $childValue["id"];
                   unset($childValue["id"]);
-                  $result = $this->model->find($this->model->id)->$childTable()->where('id', $pk)->where(str_singular($this->model->getTable()).'_id', $request["id"])->update($childValue);
+                  $foreignTable = $this->model->find($this->model->id)->$childTable()
+                    ->where('id', $pk)
+                    ->where(str_singular($this->model->getTable()).'_id', $request["id"]);
+                  foreach($childValue as $childValueKey => $childValueValue){
+                    $foreignTable->$childValueKey = $childValueValue;
+                  }
+                  $result = $foreignTable
+                    ->update($childValue);
+                  // $foreignTable->save($foreignTable);
+
                 }else{
-                  $result = $this->model->find($this->model->id)->$childTable()->create($childValue)->id;
+                  $childValue[str_singular($this->model->getTable()).'_id'] = $this->model->id;
+                  $foreignTable = $this->model->newModel($childTable, $childValue);
+                  foreach($childValue as $childValueKey => $childValueValue){
+                    $foreignTable->$childValueKey = $childValueValue;
+                  }
+                  $result = $this->model->find($this->model->id)->$childTable()->save($foreignTable)->id;
                 }
                 $childID[$childTable][] = $result;
               }
+            }
+          }
+          if(isset($request['deleted_foreign_table'][$childTable])){
+            for($x = 0; $x < count($request['deleted_foreign_table'][$childTable]); $x++){
+              $this->model->find($this->model->id)->$childTable()->where('id', $request['deleted_foreign_table'][$childTable][$x])->delete();
             }
           }
         }
@@ -481,6 +510,6 @@ class APIController extends Controller
         return $user;
     }
     public function getUserCompanyID(){
-
+      return 1;
     }
 }

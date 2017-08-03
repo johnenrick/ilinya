@@ -178,7 +178,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-        Mpociot\BotMan\BotManServiceProvider::class,
+        Mpociot\BotMan\BotManServiceProvider::class
     ],
 
     /*

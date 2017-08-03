@@ -10,7 +10,7 @@ use Mpociot\BotMan\Messages\Message;
 use Mpociot\BotMan\Facebook\ElementButton;
 use Mpociot\BotMan\Facebook\ButtonTemplate;
 
-
+use Mpociot\BotMan\Conversations\Ilinya;
 /*
   @Model
 */
@@ -18,60 +18,39 @@ use Mpociot\BotMan\Facebook\ButtonTemplate;
 
 class BotManController extends APIController
 {
-
-  protected $recipient = array(
-    "id" => null,
-    "first_name" => null,
-    "last_name" => null
-  );
-
-  protected $attachment = array(
-    "type" => null,
-    "payload" => null
-  );
-
-  protected $propertName = array(
-    "template_type" => null,
-    "text"  => null,
-    "buttons" => null
-  );
-
-  protected $button = array(
-    'title' => null,
-    'type'  => 'postback',
-    'url' => null,
-    'payload' => null
-  );
-
-
   public function handler(){
-    $ilinya = app('botman');
-    $ilinya->verifyServices('GoCentral123456789ekennCKdashIlinya2017143143leadUsLord');
+    $botman = app('botman');
+    $botman->verifyServices('GoCentral123456789ekennCKdashIlinya2017143143leadUsLord');
 
     /*
 
                 Actions Here
-
     */
 
-
     // Persistent Menus
-    $ilinya->hears('@start', function (BotMan $bot) {$this->start($bot);});
-    $ilinya->hears('@categories', function (BotMan $bot) {$this->categories($bot);});
-    $ilinya->hears('@my_queue_cards', function (BotMan $bot) {$this->queueCards($bot);});
-    $ilinya->hears('@user_guide', function (BotMan $bot) {$this->guide($bot);});
-
-
+    $botman->hears('@start', function (BotMan $ilinya) {
+      $this->start($ilinya);
+    });
+    $botman->hears('@categories', function (BotMan $ilinya) {
+      $this->categories($ilinya);
+    });
+    $botman->hears('@my_queue_cards', function (BotMan $ilinya) {
+      $this->queueCards($ilinya);
+    });
+    $botman->hears('@user_guide', function (BotMan $ilinya) {
+      $this->guide($ilinya);
+    });
 
     //Categories
-    $ilinya->hears('@ktv', function (BotMan $bot) {$this->categoryHandler($bot,'KTV');});
-    $ilinya->hears('@shippings', function (BotMan $bot) {$this->categoryHandler($bot,'Shippings');});
+    $botman->hears('@ktv', function (BotMan $ilinya) {
+      $ilinya->startConversation(new Ilinya);
+    });
 
     // start listening
-    $ilinya->listen();
+    $botman->listen();
   }
 
-  public function start(Botman $ilinya){
+  public function start(BotMan $ilinya){
      $ilinya->typesAndWaits(2);
      $ilinya->reply('Hi '.$ilinya->getUser()->getFirstName().'! My Name is Ilinya, I can help to get your reservations or tickets easily. Just follow my instructions and you will be good to go!');
      $this->categories($ilinya);
@@ -87,10 +66,6 @@ class BotManController extends APIController
       }
     }
     $ilinya->reply(ButtonTemplate::create('Select Categories:')->addButtons($buttons));
-  }
-  
-  public function categoryHandler(BotMan $ilinya, $category){
-    $ilinya->reply($category);
   }
 
   public function queueCards(BotMan $ilinya){

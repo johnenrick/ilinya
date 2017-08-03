@@ -14,6 +14,8 @@ function api_resource($apiReource){
     Route::post($apiResourceValue."/delete",$pascalCase."@delete");
     Route::post($apiResourceValue."/handler",$pascalCase."@handler");
     Route::get($apiResourceValue."/categories",$pascalCase."@categories");
+    Route::get($apiResourceValue."/receive",$pascalCase."@receive")->middleware("verify");
+    Route::post($apiResourceValue."/receive",$pascalCase."@receive");
   }
 }
 

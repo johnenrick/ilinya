@@ -7,6 +7,14 @@ use Illuminate\Support\Facades\Cache;
 use App\Ilinya\ServiceProvider;
 use App\Ilinya\Webhook\Messaging;
 use App\Ilinya\User;
+use App\Ilinya\Facebook\QuickReplyTemplate;
+use App\Ilinya\Facebook\QuickReplyElement;
+use App\Ilinya\Facebook\ButtonTemplate;
+use App\Ilinya\Facebook\ButtonElement;
+use App\Ilinya\Facebook\GenericTemplate;
+
+
+//@models
 use App\BusinessType;
 
 class Ilinya{
@@ -16,6 +24,7 @@ class Ilinya{
     public  $MY_QUEUE_CARDS   = "@my_queue_cards";
     public  $USER_GUIDE       = "@users_guide";
     public  $CONVERSATION     = "@conversation";
+    public $ERROR             = "I'm sorry but I can't do what you want me to do :'(";
     private $user;
     private $messaging;
     private $serviceProvider;
@@ -23,7 +32,7 @@ class Ilinya{
     public function __construct(Messaging $messaging){
         $this->messaging = $messaging;
         $this->serviceProvider = new ServiceProvider();
-        $this->user();
+        
     }   
 
     public function user(){
@@ -32,50 +41,28 @@ class Ilinya{
     }
 
     public function start(){
+        $this->user();
         return "Hi ".$this->user->getFirstName()."! My Name is Ilinya, I can help to get your reservations or tickets easily. Just follow my instructions and you will be good to go!";
     }
     
     public function categories(){
-        $response = [
-            "attachment" => [
-                "type" => "template",
-                "payload" => [
-                    "template_type" => "button",
-                    "text" => "Select Categories:",
-                    "buttons" => []
-                ]
-            ]
-        ];
-
         $categories = BusinessType::get();
+        $buttons = [];
         if($categories){
             foreach ($categories as $category) {
-                $response['attachment']['payload']['buttons'][] = [
-                    "title" => $category['title'],
-                    "type"  => "postback",
-                    "payload" => 'categories@'.strtolower($category['title'])
-                ];
+                $buttons[] = ButtonElement::title($category['title'])->type('postback')->payload('categories@'.strtolower($category['title']));
             }
         }
 
-        return $response;
+        return ButtonTemplate::toArray('Select Categories:',$buttons);
     }
 
     public function conversation($category){
-        $response = [
-            "message" => [
-                "text"  => "Enter your Location:",
-                "quick_replies" => [
-                    array(
-                        "content_type"  => "text",
-                        "title"         => "Red",
-                        "payload"       => "@conversation"
-                    )
-                ]
-            ]
-        ];
-        echo json_encode($response);
-        return $response;
+        $quickReplies[] = QuickReplyElement::title('Company Name')->contentType('text')->payload('@company_name');
+        $quickReplies[] = QuickReplyElement::title('Company Location')->contentType('text')->payload('@location');
+        $quickReplies[] = QuickReplyElement::title('')->contentType('location')->payload('');
+
+        return QuickReplyTemplate::toArray('Select options for search:', $quickReplies);
     } 
 
     public function myQueueCards(){

@@ -41,31 +41,28 @@ class BotHandler implements ShouldQueue{
             list($priority, $category) = explode('@', $custom['payload']);
 
             if($custom['payload'] == $ilinya->GET_STARTED){
-                $bot->reply($ilinya->start());
-                $bot->reply($ilinya->categories());
+                $bot->reply($ilinya->start(), true);
+                $bot->reply($ilinya->categories(), false);
             }
             else if($custom['payload'] == $ilinya->CATEGORIES){
-                $bot->reply($ilinya->categories());
+                $bot->reply($ilinya->categories(), false);
             }
             else if($custom['payload'] == $ilinya->MY_QUEUE_CARDS){
-                $bot->reply($ilinya->myQueueCards());
+                $bot->reply($ilinya->myQueueCards(), true);
             }
             else if($custom['payload'] == $ilinya->USER_GUIDE){
-               $bot->reply($ilinya->userGuide());
+               $bot->reply($ilinya->userGuide(), true);
             }
             else if($priority == 'categories'){
-                $bot->reply($ilinya->conversation($category));
-            }
-            else if($custom['payload'] == $ilinya->CONVERSATION){
-                $bot->reply($custom['title']);
+                $bot->reply($ilinya->conversation($category), false);
             }
             else{
-                $bot->reply("I'm sorry but I can't do what you want me to do :'(");
+                $bot->reply($ilinya->ERROR, true);
             }
         }
         else if($custom['type'] == "message"){
+             $bot->reply($custom['text'], true);
         }
-
         
     }
 }

@@ -6,10 +6,13 @@
       v-bind:value="form_data[db_name] ? form_data[db_name] : defaultValue"
       @change="$emit('change', $event)"
     >
-      <option v-for="option in options" v-bind:value="option['value']">
+      <option v-for="option in options" v-bind:value="option['value']"
+        v-bind:selected="option['value'] === form_data[db_name] ? 'selected' : false"
+      >
         {{option['label']}}
       </option>
     </select>
+
     <span v-else class="form-control">{{this.option_lookup[form_data[db_name]]}}</span>
   </div>
 </template>
@@ -31,10 +34,21 @@
     },
     props: {
       input_setting: Object,
-      default_value: String,
+      default_value: [String, Number],
       db_name: String,
       form_data: Object,
       form_status: String
+    },
+    watch: {
+      form_status(value){
+        if(value === 'create' || value === 'editing' || value === 'view'){
+          if(typeof this.input_setting['option_function'] !== 'undefined'){
+            this.input_setting['option_function'](this)
+          }
+        }
+      },
+      options(value){
+      }
     },
     methods: {
       initInputSetting(){

@@ -9,7 +9,7 @@ class QueueFormField extends APIModel
     protected $fillable = ['queue_form_id', 'description'];
     protected $attributes = array(
       'type' => 'text',
-      'setting' => ''
+      'setting' => '-'
     );
 
 }

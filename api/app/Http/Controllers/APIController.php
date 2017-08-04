@@ -213,7 +213,9 @@ class APIController extends Controller
                 $childValue[str_singular($this->model->getTable()).'_id'] = $this->model->id;
                 $foreignTable = $this->model->newModel($childTable, $childValue);
                 foreach($childValue as $childValueKey => $childValueValue){
-                  $foreignTable->$childValueKey = $childValueValue;
+                  if($childValueValue == null || $childValueValue == "" || empty($childValueValue)){
+                    $foreignTable->$childValueKey = $childValueValue;
+                  }
                 }
                 $result = $this->model->find($this->model->id)->$childTable()->save($foreignTable);
                 $childID[$childTable][] = $result["id"];
@@ -276,7 +278,8 @@ class APIController extends Controller
       if(isset($condition)){
         for($x = 0; $x < count($condition); $x++){
           $columnExploded = explode('.', $condition[$x]['column']);
-          if(count($columnExploded > 1)){ // foreign table
+          // $this->response['debug'][] =
+          if(count($columnExploded) > 1){ // foreign table
             if(!isset($initializedCondition['foreign_table'][$columnExploded[0]])){
               $initializedCondition['foreign_table'][$columnExploded[0]] = array();
             }
@@ -302,7 +305,7 @@ class APIController extends Controller
       //     $this->model = $this->model->leftJoin($pluralForeignTable, $pluralForeignTable.'.id', '=', $tableName.'.'.$singularForeignTable.'_id');
       //   }
       // }
-      $condition = isset($request['condition']) ? $this->initCondition($request['condition']) : array();
+      $condition = isset($request['condition']) ? $this->initCondition($request['condition']) : array('main_table' => array(), 'foreign_table' => array());
       if(isset($request['with_foreign_table'])){
         $foreignTable = array();
         foreach($request['with_foreign_table'] as $tempForeignTable){
@@ -310,7 +313,6 @@ class APIController extends Controller
             $foreignTable[] = $tempForeignTable;
             if(isset($condition['foreign_table'][str_plural($tempForeignTable)])){
               $this->model = $this->model->whereHas($tempForeignTable, function($q) use($condition, $tempForeignTable){
-                $this->printR($condition);
                 $tempForeignTablePlural = str_plural($tempForeignTable);
                 for($x = 0; $x < count($condition['foreign_table'][$tempForeignTablePlural]); $x++){
                   $column = $condition['foreign_table'][$tempForeignTablePlural][$x]['column'];
@@ -322,9 +324,14 @@ class APIController extends Controller
             }
           }
         }
+
         if(count($foreignTable)){
           $this->model = $this->model->with($foreignTable);
         }
+      }
+      $this->response['debug'][] = $condition['main_table'];
+      if(count($condition['main_table'])){
+        $this->addCondition($condition['main_table']);
       }
       if(isset($request["id"])){
          $this->model = $this->model->where($tableName.".id", "=", $request["id"]);
@@ -418,7 +425,9 @@ class APIController extends Controller
                     ->where('id', $pk)
                     ->where(str_singular($this->model->getTable()).'_id', $request["id"]);
                   foreach($childValue as $childValueKey => $childValueValue){
-                    $foreignTable->$childValueKey = $childValueValue;
+                    if($childValueValue == null || $childValueValue == ""){
+                      $foreignTable->$childValueKey = $childValueValue;
+                    }
                   }
                   $result = $foreignTable
                     ->update($childValue);
@@ -428,7 +437,9 @@ class APIController extends Controller
                   $childValue[str_singular($this->model->getTable()).'_id'] = $this->model->id;
                   $foreignTable = $this->model->newModel($childTable, $childValue);
                   foreach($childValue as $childValueKey => $childValueValue){
-                    $foreignTable->$childValueKey = $childValueValue;
+                    if($childValueValue == null || $childValueValue == ""){
+                      $foreignTable->$childValueKey = $childValueValue;
+                    }
                   }
                   $result = $this->model->find($this->model->id)->$childTable()->save($foreignTable)->id;
                 }
@@ -471,12 +482,13 @@ class APIController extends Controller
       /*
         column, clause, value
       */
-
+      $this->response['debug'][] = "he";
       if($conditions){
         foreach($conditions as $condition){
           /*Table.Column, Clause, Value*/
           $condition["clause"] = (isset($condition["clause"])) ? $condition["clause"] : "=";
           $condition["value"] = (isset($condition["value"])) ? $condition["value"] : null;
+          $this->response['debug'][] = $condition["column"];
           switch($condition["clause"]){
             default :
               $this->model = $this->model->where($condition["column"], $condition["clause"], $condition["value"]);

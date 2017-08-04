@@ -89,7 +89,10 @@
         this.retrieveData()
       },
       retrieveData(retrieveType){
-        let requestOption = this.retrieve_parameter
+        let requestOption = {} // this.retrieve_parameter
+        for(let x in this.retrieve_parameter){
+          requestOption[x] = this.retrieve_parameter[x]
+        }
         if(this.currentSort && this.currentSort['sort']){
           let orderLookUp = ['', 'asc', 'desc']
           requestOption['sort'] = {}

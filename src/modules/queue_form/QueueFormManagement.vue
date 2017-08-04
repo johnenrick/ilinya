@@ -40,6 +40,7 @@
                 // type: {
                 //
                 // },
+                sequence: {},
                 additional_option: {
                   db_name: 'setting'
                 },

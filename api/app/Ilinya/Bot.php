@@ -3,8 +3,10 @@
 namespace App\Ilinya;
 
 use App\Ilinya\Webhook\Messaging;
+use App\Ilinya\Webhook\Message;
 use Illuminate\Support\Facades\Log;
 use App\Ilinya\ServiceProvider;
+
 
 class Bot{  
   
@@ -27,8 +29,10 @@ class Bot{
     }
 
     public function extractDataFromMessage(){
+        $message = new Message($this->messaging->getMessageArray());
         return [
-            "type"  =>  "message"
+            "type"  => "message",
+            "text" => $message->getText()
         ];
     }
 
@@ -40,13 +44,9 @@ class Bot{
         ];
     }
 
-    public function reply($data){
-        if (method_exists($data, "toMessage")) {
-            $data = $data->toMessage();
-        } else if (gettype($data) == "string") {
-            $data = ["text" => $data];
-        }
+    public function reply($data, $flag){
+        $message = ($flag == true)?["text" => $data] : $data;
         $id = $this->messaging->getSenderId();
-        $this->serviceProvider->send($id, $data);
+        $this->serviceProvider->send($id, $message);
     }
 }

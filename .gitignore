@@ -13,3 +13,13 @@ api/app/Department.php
 
 src/config.js
 api/.env
+
+api/.env
+
+api/composer.lock
+
+node_modules/tether/package.json
+
+package.json
+
+src/config.js

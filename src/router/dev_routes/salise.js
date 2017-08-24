@@ -23,5 +23,13 @@ export default{
     meta: {
       tokenRequired: false
     }
+  },
+  {
+    path: '/dashboard',
+    name: 'dashboard',
+    component: resolve => require(['modules/dashboard/Dashboard.vue'], resolve),
+    meta: {
+      tokenRequired: false
+    }
   }]
 }
